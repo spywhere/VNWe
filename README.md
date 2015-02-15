@@ -1,6 +1,8 @@
 ## VNWe
 A web-based visual novel engine
 
+[![Release](https://img.shields.io/github/release/spywhere/VNWe.svg?style=flat)](https://github.com/spywhere/VNWe/releases) [![Issues](https://img.shields.io/github/issues/spywhere/VNWe.svg?style=flat)](https://github.com/spywhere/VNWe/issues)
+
 ### Features
 - Customisable user interfaces
 - Animation and Layering system
