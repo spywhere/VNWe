@@ -5,5 +5,18 @@
 			"follow_symlinks": true,
 			"path": "."
 		}
-	]
+	],
+	"terminality": {
+		"run_if_only_one_available": true,
+		"additional_execution_units": {
+	        "*": {
+	        	"terminal": 0,
+	            "run": {
+	            	"name": "Verify all .js files",
+	            	"description": "Code test on .js files",
+	                "command": "./node_modules/jshint/bin/jshint js/vnwe.js assets/*"
+	            }
+	        }
+	    }
+	}
 }

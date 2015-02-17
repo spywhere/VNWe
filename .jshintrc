@@ -1,0 +1,17 @@
+{
+  "undef": true,
+  "unused": true,
+  "enforceall": true,
+  "nocomma": false,
+
+  // Environments
+  "browser": true,
+  "devel": true,
+
+  //Globals
+  "globals": {
+  	"VNWe": false,
+  	"VNWeScript": false,
+  	"VNWeLanguage": false
+  }
+}
