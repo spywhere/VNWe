@@ -42,6 +42,7 @@ myscript.game({
 ```
 
 - `game` Game -- Cannot be set once game starts
+  - `border: "1px solid #ffffff"` [string] Border settings (same as css style)
   - `width: 800` [integer] Game width
   - `height: 600` [integer ] Game height
   - `sfx: true` [boolean] Use the sound effects
