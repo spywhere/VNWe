@@ -222,6 +222,14 @@
 
 		// Internal
 
+		this.imageProgress = function(script, ctx, progress){
+			ctx.clearRect(0, 0, script._game.width, script._game.height);
+			ctx.font = "16px sans-serif";
+			ctx.fillStyle = "#ffffff";
+			ctx.textAlign = "center";
+			ctx.fillText("Loading " + (progress*100).toFixed(2) + "%", script._game.width/2, script._game.height/2);
+		}
+
 		this.makeStep = function(){
 			var step = new VNWeStep({
 				game: this._game,
@@ -272,13 +280,14 @@
 		this.getVersion = function(){
 			return "VNWe v3.0";
 		};
+
+		this._callbacks.loading.images = this.imageProgress;
 	}
 
 	function VNWe(script){
 		this.lang = new VNWeLanguage();
 		this.script = script;
 		this.waiting = {};
-		this.imageBuffer = [];
 
 		this.getTick = function(){
 			return (new Date()).getTime();
@@ -291,22 +300,29 @@
 		this.fadeImage = function(script, endTime){
 			var image = script._image;
 			endTime = endTime || this.getTick()+image.duration;
+
+			var ctx = this.game.getContext("2d");
+			ctx.save();
+			var img = document.createElement("img");
+			img.src = script.path("images", image.url);
+
 			var elapse = endTime-this.getTick();
-			if(elapse < 0 || image.duration == 2){
-				this.imageBuffer[0].style.opacity = 1;
-				this.imageBuffer[this.imageBuffer.length-1].style.opacity = 0;
-				this.imageBuffer[0].style.zIndex = 2;
+			if(elapse < 0 || image.duration === 2){
+				ctx.globalAlpha = 1;
 				this.waiting.image = false;
-				return;
+			}else{
+				ctx.globalAlpha = 1-elapse/image.duration;
+				this.waiting.image = true;
 			}
-			this.waiting.image = true;
-			this.imageBuffer[0].style.zIndex = 2;
-			this.imageBuffer[0].style.opacity = 1-elapse/image.duration;
-			this.imageBuffer[0].src = script.path("images", image.url);
+			ctx.drawImage(img, 0, 0);
+			ctx.restore();
+
 			var vnwe = this;
-			setTimeout(function(){
-				vnwe.fadeImage(script, endTime);
-			}, 25);
+			if(this.waiting.image){
+				setTimeout(function(){
+					vnwe.fadeImage(script, endTime);
+				}, 25);
+			}
 		};
 
 		this.nextScript = function(){
@@ -356,10 +372,6 @@
 			// }
 
 			if("_image" in script){
-				for(var i=this.imageBuffer.length-1;i>=0;i--){
-					this.imageBuffer[i].style.zIndex = 1;
-				}
-				this.imageBuffer.push(this.imageBuffer.shift());
 				this.fadeImage(script);
 			}
 
@@ -391,39 +403,37 @@
 			this.nextScript();
 		};
 
-		this.preloadImage = function(index, loadingParent, loadingText){
+		this.preloadImage = function(index){
 			index = index || 0;
-			loadingParent = loadingParent || document.createElement("table");
-			loadingText = loadingText || document.createElement("td");
-			if(index === 0){
-				var row = document.createElement("tr");
-				row.appendChild(loadingText);
-				loadingParent.appendChild(row);
-				this.game.appendChild(loadingParent);
-			}
-			loadingParent.style.width = "100%";
-			loadingParent.style.height = "100%";
-			loadingText.style.color = "#ffffff";
-			loadingText.style.textAlign = "center";
-			loadingText.innerHTML = "Loading " + (index*100/this.script.totalScript()).toFixed(2) + "%";
+
+			var ctx = this.game.getContext("2d");
 			if(this.script.totalScript() <= index){
-				this.game.removeChild(loadingParent);
+				ctx.save();
+				ctx.clearRect(0, 0, script._game.width, script._game.height);
+				ctx.restore();
 				this.prepareScript();
 				return;
 			}
+
+			if(this.script._callbacks.loading.images){
+				ctx.save();
+				this.script._callbacks.loading.images(this.script, ctx, index/this.script.totalScript());
+				ctx.restore();
+			}
+
 			var imageURL = this.script.getImage(index);
 			if(!imageURL){
-				this.preloadImage(index+1, loadingParent, loadingText);
+				this.preloadImage(index+1);
 				return;
 			}
 			var image = document.createElement("img");
 			var vnwe = this;
 			image.addEventListener("load", function(){
-				vnwe.preloadImage(index+1, loadingParent, loadingText);
+				vnwe.preloadImage(index+1);
 			});
 			image.addEventListener("error", function(){
 				console.error("Error cannot load " + imageURL);
-				vnwe.preloadImage(index+1, loadingParent, loadingText);
+				vnwe.preloadImage(index+1);
 			});
 			image.src = imageURL;
 		};
@@ -446,7 +456,11 @@
 			if(document.oncontextmenu){
 				document.oncontextmenu=function(){return false;};
 			}
-			this.game = document.createElement("div");
+			this.game = document.createElement("canvas");
+			var supported = this.game.getContext && this.game.getContext("2d");
+			if(!supported){
+				this.game = document.createElement("div");
+			}
 			this.game.style.position = "absolute";
 			this.game.style.left = "50%";
 			this.game.style.top = "50%";
@@ -458,18 +472,22 @@
 			this.game.style.border = "1px solid #ffffff";
 			document.body.style.backgroundColor = "#000000";
 			document.body.appendChild(this.game);
-
-			for(var i=0;i<3;i++){
-				var imageDiv = document.createElement("img");
-				imageDiv.style.position = "absolute";
-				imageDiv.style.left = "0px";
-				imageDiv.style.top = "0px";
-				imageDiv.style.width = "100%";
-				imageDiv.style.height = "100%";
-				imageDiv.style.opacity = "0";
-				this.game.appendChild(imageDiv);
-				this.imageBuffer.push(imageDiv);
+			if(!supported){
+				var table = document.createElement("table");
+				table.style.width = "100%";
+				table.style.height = "100%";
+				this.game.appendChild(table);
+				var row = document.createElement("tr");
+				table.appendChild(row);
+				var cell = document.createElement("td");
+				cell.align = "center";
+				cell.style.color = "#ffffff";
+				cell.innerHTML = "Your browser is not support canvas. Please upgrade to newer version.";
+				row.appendChild(cell);
+				return;
 			}
+			this.game.width = "800";
+			this.game.height = "600";
 
 			this.verifyGame();
 		};

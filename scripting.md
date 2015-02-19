@@ -8,8 +8,6 @@
 - `~i~` = Italic text
 - `~b~` = Bold text
 - `~u~` = Underline text
-- `~[~` = Japan's [
-- `~]~` = Japan's ]
 - `~~` = `~` (tilde) character
 
 ### Animation and Layering Script
@@ -95,13 +93,13 @@ myscript.game({
 - `debug` Debug Mode
   - `enable: false` [boolean] Enable debug mode
   - `border: "1px solid #777777"` [string] Debug mode border
-- `callbacks` Event Callbacks
+- `callbacks` Event Callbacks. Each callback must receives game script [VNWeScript], canvas render context (2D) and loading progress [float 0..1]
   - `start` [object]
      - `game: null` [function] Callback to called when game starts
      - `text: null` [function] Callback to called before showing the current script line
   - `loading` [object]
-     - `images: null` [function] Callback to called while loading images
-     - `bgm: null` [function] Callback to called while loading background music
+     - `images: <default>` [function] Callback to called while loading images. Default callback is a text indicate loading progress in the center-middle of the game
+     - `bgm: <default>` [function] Callback to called while loading background music. Default callback is a text indicate loading progress on the center-top of the game
   - `finish` [object]
      - `game: null` [function] Callback to called after game ended
      - `images: null` [function] Callback to called after loading images
