@@ -1,46 +1,121 @@
 ## VNWe Script Format
 
+**Note!** Commands must be used on `VNWeScript` instance object.
+
+### Notations and Units
+
+#### Notations
+This scripting guide will use following notations through out the guides...
+
+##### Object-Type or Methods with one JavaScript object as its argument
+Notation:
+
+- `object/method`
+  - `key/argument` A key in object or an argument in method
+
+Example usage:
+
+```javascript
+method({
+	argument: value
+});
+```
+
+##### Explicitly Specified Methods
+Notation:
+
+- `method(<arg1>, <arg2>, ...)` Description of method that receives a JavaScript object as its parameter
+  - `arg1` First argument description
+  - `arg2` Second argument description
+
+Example usage:
+
+```javascript
+method(arg1, arg2);
+```
+
+##### Default Values
+Example `width: 400` or `image: <req>`.
+
+ - `<req>` Indicated that argument is required
+ - `<default>` Argument with default value (value description described at the end) (can be omitted)
+ - `<inherit>` Argument with inherited/derived value from context (can be omitted)
+ - *Exact value* Argument with exact default value (can be omitted)
+
+##### Data Type
+Value data type will specified before a description of each command or argument.
+
+Some data types may allows only one choice of values, which will described at the end.
+
+- `[type]` A data type without any limitation
+- `[type A..B]` A data type with range from A to B (inclusive)
+
+Data type can be the followings...
+
+- `integer` A whole number
+- `float` A decimal point number
+- `string` A text or sequence of characters
+- `boolean` A value of `true` or `false`
+- `object` A key/value pairs or JavaScript object
+- `function` A JavaScript function
+- `color` A hexidecimal color value or web color name
+- `css` A CSS-type value
+
+#### Units
+Units used in the engine are...
+
+- Pixels
+- Milliseconds
+
+Unless specified by each command.
+
 ### Text Format
 - `\n` = New line
-- `~clr~` = Clear screen
-- `~c#<Color>~` = Text color
-- `~s<Size>~` = Text size
-- `~i~` = Italic text
-- `~b~` = Bold text
-- `~u~` = Underline text
-- `~~` = `~` (tilde) character
+- `[clr]` = Clear screen
+- `[c=<Color>]...[/c]` = Text color [color]
+- `[s=<Size>]...[/s]` = Text size [integer]
+- `[i]...[/i]` = Italic text
+- `[b]...[/b]` = Bold text
+- `[u]...[/u]` = Underline text
 
-### Animation and Layering Script
-- `<Image URL>` = Set image
-- `wait:<Time>` = Wait for specified ms
-- `hide:<Time>` = Hide the image for specified ms
+### Animation Timing Script
 
-Example: `abc.jpg|wait:8000|def.jpg|hide:500`
+Each timing separated by a `|` (pipe)
+
+- `wait:<Time>` = Wait for specified time
+- `hide:<Time>` = Hide the image for specified time
+- `rand:<Time>..<Time>` = Wait randomly within a range of time
+- `rand:<Time>` = Same as `rand:0..<Time>`
+
+Example: `wait:8000|hide:500|rand:50|rand:5..100`
 
 ### VN Settings
 
-**Note!** Commands must be used on `VNWeScript` instance object.
+Each command returns the object that has been set and must be use as a read-only object.
 
-Each command use as a method with JavaScript object as a parameter.
+Only valid settings will be set to the game.
 
 Example:
 
-```json
+```javascript
 // ...
 var myscript = new VNWeScript();
+
+var defaultSettings = myscript.game();
 
 myscript.game({
 	width: 800,
 	height: 600,
 	sfx: false,
 	bgm: false,
-	voices: false
+	voices: false,
+	another: "value" // This will not get set in the game
 });
 // ...
 ```
 
-- `game` Game -- Cannot be set once game starts
-  - `border: "1px solid #ffffff"` [string] Border settings (same as css style)
+- `game` Game -- Should not be set once game starts
+  - `border: "1px solid #ffffff"` [css] Border settings
   - `width: 800` [integer] Game width
   - `height: 600` [integer ] Game height
   - `sfx: true` [boolean] Use the sound effects
@@ -56,9 +131,9 @@ myscript.game({
   - `height: 150` [integer] Box height
   - `radius: 15` [integer] Box border radius
   - `opacity: 1` [float 0..1] Box opacity
-  - `background: "#000000"` [string] Background color
-  - `text: "#ffffff"` [string] Text color
-  - `border: "1px solid #ffffff"` [string] Border settings (same as css style)
+  - `background: "#000000"` [color] Background color
+  - `text: "#ffffff"` [color] Text color
+  - `border: "1px solid #ffffff"` [css] Border settings
   - `visible: true` [boolean] Box Visibility
 - `images` Images
   - `left: 0` [integer 0..100] Percentage offset from the left to right
@@ -68,7 +143,10 @@ myscript.game({
      - `y: 0` [integer] Offset relative to top property
 - `prompter` Prompter (aka ender)
   - `fixed: false` [boolean] Show the prompter at the lower right corner instead of after the text
-  - `url: "prompter.gif"` [string] Prompter image
+  - `image: "prompter.png"` [string] Prompter image
+  - `interval: 200` [integer] The delay between each frame
+  - `width: 13` [integer] The width for one frame
+  - `height: 13` [integer] The height for one frame
   - `offset: 10` [integer] If fixed, offset from the lower right corner, otherwise, spacing after the text
 - `sounds` Sound and Music
   - `sfx: 1` [float 0..1] Sound effect volume
@@ -89,54 +167,56 @@ myscript.game({
   - `width: 550` [integer] Box width
   - `height: 50` [integer] Box height
   - `opacity: 0.5` [float 0..1] Box opacity
-  - `color: "#ffffff"` [string] Note text color
+  - `color: "#ffffff"` [color] Note text color
 - `debug` Debug Mode
   - `enable: false` [boolean] Enable debug mode
-  - `border: "1px solid #777777"` [string] Debug mode border
-- `callbacks` Event Callbacks. Each callback must receives game script [VNWeScript], canvas render context (2D) and loading progress [float 0..1]
-  - `start` [object]
+  - `border: "1px solid #777777"` [css] Debug mode border
+- `callbacks` Event Callbacks
+  - `start` [object] Each callback must receives a game script [VNWeScript] and a canvas render context (2D)
      - `game: null` [function] Callback to called when game starts
      - `text: null` [function] Callback to called before showing the current script line
-  - `loading` [object]
+  - `loading` [object] Each callback must receives a game script [VNWeScript], a canvas render context (2D) and loading progress [float 0..1]
      - `images: <default>` [function] Callback to called while loading images. Default callback is a text indicate loading progress in the center-middle of the game
      - `bgm: <default>` [function] Callback to called while loading background music. Default callback is a text indicate loading progress on the center-top of the game
-  - `finish` [object]
-     - `game: null` [function] Callback to called after game ended
+  - `finish` [object] Each callback must receives a game script [VNWeScript] and a canvas render context (2D)
+     - `game: <default>` [function] Callback to called after game ended. Default callback is a dialog box with the word "End!"
      - `images: null` [function] Callback to called after loading images
      - `bgm: null` [function] Callback to called after loading background music
      - `text: null` [function] Callback to called after finish the current script line
-- `custom(<code>)` [string] Custom code to add to the game
+- `custom(<code>)` Custom Code
+   - `code: <req>` [string] Custom code to add to the game
 
 ### Scripting
 #### Story
 - `align(<alignment>)` Text Alignment
-  - `alignment` [string] One of `left`, `center` or `right`
+  - `alignment: <req>` [string] Text alignment. Must be one of `left`, `center` or `right`
 - `text(<text>, <speed>)` Story Text
-  - `text` [string] Text to show
-  - `speed` [integer] Printing speed
+  - `text: <req>` [string] Text to show
+  - `speed: 30` [integer] Printing speed
 - `note(<text>)` Note Test
-  - `text` [string] Text to show
-- `image(<image>, <speed>)` Background Image
-  - `image` [string] Background Image
-  - `speed` [integer] Fading speed
+  - `text: <req>` [string] Text to show
+- `image(<image>, <duration>)` Background Image
+  - `image: <req>` [string] Background Image
+  - `duration: 100` [integer] Fading duration
 
 #### Advanced Story
-- `anim(<code>, <properties>)` Animation and Layer
-  - `code` [string] Animation and Layering script (see *Layering* section aboves)
+- `anim` Animation and Layer
+  - `image: <req>` [string] Image
+  - `code: ""` [string] Animation timing script (see *Animation Timing Script* section above)
+  - `width: <inherit>` [integer] The width for one frame
+  - `height: <inherit>` [integer] The height for one frame
 - `anchor(<name>)` Anchor
-  - `name` [string] Name of anchor
-- `goto(<anchor>)` Go to Anchor
-  - `anchor` Name of anchor
-- `decision(<properties>)` Routing Decision Box
-  - `properties` [object]
-- `button(<properties>)` Button Styling?
-  - `properties` [object]
+  - `name: <req>` [string] Name of anchor
+- `goto(<name>)` Go to Anchor
+  - `name: <req>` Name of anchor
+- `decision` Routing Decision Box
+- `button` Button Styling?
 
 #### Prompter
-- `auto([delay])`
-  - `delay` [integer] Delay before continue
-- `wait([prompter])`
-  - `prompter` [boolean] Show prompter on wait
+- `auto(<delay>)`
+  - `delay: 0` [integer] Delay before continue
+- `wait(<prompter>)`
+  - `prompter: true` [boolean] Show prompter on wait
 
 #### Sound, Music and Voices
 - `sfx(<name>, <properties>)` Sound Effect

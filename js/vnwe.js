@@ -75,7 +75,10 @@
 		};
 		this._prompter = {
 			fixed: false,
-			url: "prompter.gif",
+			image: "prompter.png",
+			interval: 200,
+			width: 13,
+			height: 13,
 			offset: 10
 		};
 		this._sounds = {
@@ -186,6 +189,11 @@
 
 		// Scripting
 
+		this.text = function(text, speed){
+			if(!text){return;}
+			speed = speed || 30;
+		}
+
 		this.image = function(url, duration){
 			if(!url){return;}
 			duration = duration || 100;
@@ -200,37 +208,38 @@
 			if(delay === null || delay === undefined || delay < 0){
 				delay = 0;
 			}
-			var step = this.makeStep();
+			var step = this._makeStep();
 			step.ending({
 				delay: delay,
 				prompter: false
 			});
-			this._script[this.nextLine()] = step;
+			this._script[this._nextLine()] = step;
 		};
 
 		this.wait = function(prompter){
 			if(prompter === null || prompter === undefined){
 				prompter = true;
 			}
-			var step = this.makeStep();
+			var step = this._makeStep();
 			step.ending({
 				delay: -1,
 				prompter: prompter
 			});
-			this._script[this.nextLine()] = step;
+			this._script[this._nextLine()] = step;
 		};
 
 		// Internal
 
-		this.imageProgress = function(script, ctx, progress){
+		this._imageProgress = function(script, ctx, progress){
 			ctx.clearRect(0, 0, script._game.width, script._game.height);
 			ctx.font = "16px sans-serif";
 			ctx.fillStyle = "#ffffff";
 			ctx.textAlign = "center";
+			ctx.textBaseline = "middle";
 			ctx.fillText("Loading " + (progress*100).toFixed(2) + "%", script._game.width/2, script._game.height/2);
-		}
+		};
 
-		this.makeStep = function(){
+		this._makeStep = function(){
 			var step = new VNWeStep({
 				game: this._game,
 				texts: this._texts,
@@ -250,30 +259,30 @@
 			return step;
 		};
 
-		this.resetLine = function(){
+		this._resetLine = function(){
 			this._line = 0;
 		};
 
-		this.line = function(){
+		this._getLine = function(){
 			return this._line;
 		};
 
-		this.nextLine = function(){
+		this._nextLine = function(){
 			return this._line++;
 		};
 
-		this.getImage = function(index){
-			return this.script(index).image();
+		this._getImage = function(line){
+			return this._getScript(line).image();
 		};
 
-		this.script = function(line){
+		this._getScript = function(line){
 			if(line === null || line === undefined){
-				line = this.nextLine();
+				line = this._nextLine();
 			}
 			return this._script[line];
 		};
 
-		this.totalScript = function(){
+		this._totalScript = function(){
 			return this._script.length;
 		};
 
@@ -281,7 +290,10 @@
 			return "VNWe v3.0";
 		};
 
-		this._callbacks.loading.images = this.imageProgress;
+		this._callbacks.loading.images = this._imageProgress;
+		this._callbacks.finish.game = function(script, ctx){
+			alert("End!");
+		};
 	}
 
 	function VNWe(script){
@@ -294,7 +306,12 @@
 		};
 
 		this.endScript = function(){
-			alert("End!");
+			if(this.script._callbacks.finish.game){
+				var ctx = this.game.getContext("2d");
+				ctx.save();
+				this.script._callbacks.finish.game(this.script, ctx);
+				ctx.restore();
+			}
 		};
 
 		this.fadeImage = function(script, endTime){
@@ -303,7 +320,7 @@
 
 			var ctx = this.game.getContext("2d");
 			ctx.save();
-			var img = document.createElement("img");
+			var img = new Image();
 			img.src = script.path("images", image.url);
 
 			var elapse = endTime-this.getTick();
@@ -333,12 +350,12 @@
 			}
 
 			this.waiting.main = true;
-			this.currentLine = this.script.nextLine();
-			if(this.currentLine >= this.script.totalScript()){
+			this.currentLine = this.script._nextLine();
+			if(this.currentLine >= this.script._totalScript()){
 				this.endScript();
 				return;
 			}
-			var script = this.script.script(this.currentLine);
+			var script = this.script._getScript(this.currentLine);
 
 			// if("_game" in script){
 			// 	console.log("Setup game");
@@ -370,6 +387,10 @@
 			// if("_custom" in script){
 			// 	console.log("Setup custom");
 			// }
+
+			if("_text" in script){
+
+			}
 
 			if("_image" in script){
 				this.fadeImage(script);
@@ -407,7 +428,7 @@
 			index = index || 0;
 
 			var ctx = this.game.getContext("2d");
-			if(this.script.totalScript() <= index){
+			if(this.script._totalScript() <= index){
 				ctx.save();
 				ctx.clearRect(0, 0, script._game.width, script._game.height);
 				ctx.restore();
@@ -417,16 +438,16 @@
 
 			if(this.script._callbacks.loading.images){
 				ctx.save();
-				this.script._callbacks.loading.images(this.script, ctx, index/this.script.totalScript());
+				this.script._callbacks.loading.images(this.script, ctx, index/this.script._totalScript());
 				ctx.restore();
 			}
 
-			var imageURL = this.script.getImage(index);
+			var imageURL = this.script._getImage(index);
 			if(!imageURL){
 				this.preloadImage(index+1);
 				return;
 			}
-			var image = document.createElement("img");
+			var image = new Image();
 			var vnwe = this;
 			image.addEventListener("load", function(){
 				vnwe.preloadImage(index+1);
@@ -445,7 +466,7 @@
 				console.log(this.lang.verificationFailed);
 				return;
 			}
-			this.script.resetLine();
+			this.script._resetLine();
 			this.preloadImage();
 		};
 
