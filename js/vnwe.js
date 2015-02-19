@@ -192,7 +192,12 @@
 		this.text = function(text, speed){
 			if(!text){return;}
 			speed = speed || 30;
-		}
+
+			this._text = {
+				text: text,
+				speed: speed
+			};
+		};
 
 		this.image = function(url, duration){
 			if(!url){return;}
@@ -252,6 +257,10 @@
 				callbacks: this._callbacks,
 				custom: this._custom
 			});
+			if("_text" in this && this._text){
+				step._text = this._text;
+				this._text = undefined;
+			}
 			if("_image" in this && this._image){
 				step._image = this._image;
 				this._image = undefined;
@@ -291,21 +300,25 @@
 		};
 
 		this._callbacks.loading.images = this._imageProgress;
-		this._callbacks.finish.game = function(script, ctx){
+		this._callbacks.finish.game = function(){
 			alert("End!");
 		};
 	}
 
 	function VNWe(script){
+		this.markupPattern = /\[(clr|[bi]|\/([bsic])|([cs])=([^\]]+))\]/i;
 		this.lang = new VNWeLanguage();
 		this.script = script;
 		this.waiting = {};
+		this.render = {};
 
 		this.getTick = function(){
 			return (new Date()).getTime();
 		};
 
 		this.endScript = function(){
+			clearInterval(this.renderThread);
+			this.renderThread = undefined;
 			if(this.script._callbacks.finish.game){
 				var ctx = this.game.getContext("2d");
 				ctx.save();
@@ -314,31 +327,148 @@
 			}
 		};
 
+		this.runText = function(script, currentIndex){
+			if(currentIndex === null || currentIndex === undefined){
+				currentIndex = 0;
+			}
+
+			if(currentIndex < script._text.text.length){
+				this.waiting.text = true;
+			}else{
+				this.waiting.text = false;
+				return;
+			}
+			if(!("text" in this.render)){
+				this.render.text = "";
+			}
+
+			var matches = this.markupPattern.exec(script._text.text.substr(currentIndex));
+			var escape = script._text.text.substr(currentIndex, 2);
+			if(escape == "\\[" || escape == "\\\\"){
+				this.render.text += escape;
+				currentIndex += 2;
+			}else if(matches && matches.index == 0){
+				var markup = matches[1];
+				if(markup == "clr"){
+					this.render.text = "";
+				}else{
+					this.render.text += script._text.text.substr(currentIndex, matches[0].length);
+				}
+				currentIndex += matches[0].length;
+			}else{
+				this.render.text += script._text.text[currentIndex++];
+			}
+
+			if(this.waiting.text){
+				var vnwe = this;
+				setTimeout(function(){
+					vnwe.runText(script, currentIndex);
+				}, script._text.speed);
+			}
+		};
+
 		this.fadeImage = function(script, endTime){
 			var image = script._image;
 			endTime = endTime || this.getTick()+image.duration;
 
-			var ctx = this.game.getContext("2d");
-			ctx.save();
 			var img = new Image();
 			img.src = script.path("images", image.url);
 
 			var elapse = endTime-this.getTick();
 			if(elapse < 0 || image.duration === 2){
-				ctx.globalAlpha = 1;
+				this.render.image = {
+					image: img,
+					opacity: 1
+				};
 				this.waiting.image = false;
 			}else{
-				ctx.globalAlpha = 1-elapse/image.duration;
+				this.render.image = {
+					image: img,
+					opacity: 1-elapse/image.duration
+				};
 				this.waiting.image = true;
 			}
-			ctx.drawImage(img, 0, 0);
-			ctx.restore();
 
-			var vnwe = this;
 			if(this.waiting.image){
+				var vnwe = this;
 				setTimeout(function(){
 					vnwe.fadeImage(script, endTime);
 				}, 25);
+			}
+		};
+
+		this.renderFrame = function(){
+			var ctx = this.game.getContext("2d");
+			if("image" in this.render){
+				ctx.save();
+				ctx.globalAlpha = this.render.image.opacity;
+				ctx.drawImage(this.render.image.image, 0, 0);
+				ctx.restore();
+			}
+			if("text" in this.render){
+				var currentIndex = 0;
+				var ox = 0;
+				var oy = 0;
+				var bold = false;
+				var italic = false;
+				var defSize = "14";
+				var fontSize = "14";
+				var defColor = "#ffffff";
+				var fontColor = "#ffffff";
+
+				while(currentIndex < this.render.text.length){
+					var matches = this.markupPattern.exec(this.render.text.substr(currentIndex));
+					var escape = this.render.text.substr(currentIndex, 2);
+					if(escape == "\\[" || escape == "\\\\"){
+						currentIndex += 1;
+						// Add one more belows
+					}else if(matches && matches.index == 0){
+						if(matches[3]){
+							var styleType = matches[3];
+							var value = matches[4];
+							if(styleType == "s"){
+								fontSize = value;
+							}else if(styleType == "c"){
+								fontColor = value;
+							}
+						}else{
+							var markup = matches[1];
+							if(markup == "b"){
+								bold = true;
+							}else if(markup == "/b"){
+								bold = false;
+							}else if(markup == "i"){
+								italic = true;
+							}else if(markup == "/i"){
+								italic = false;
+							}else if(markup == "/s"){
+								fontSize = defSize;
+							}else if(markup == "/c"){
+								fontColor = defColor;
+							}
+						}
+						currentIndex += matches[0].length;
+						continue;
+					}
+
+					var fontName = "";
+					if(bold){
+						fontName += "bold ";
+					}
+					if(italic){
+						fontName += "italic ";
+					}
+					fontName += fontSize + "px ";
+					fontName += "sans-serif";
+
+					ctx.save();
+					ctx.font = fontName;
+					ctx.fillStyle = fontColor;
+					ctx.fillText(this.render.text[currentIndex], 100+ox, 400+oy);
+					ox += ctx.measureText(this.render.text[currentIndex]).width;
+					ctx.restore();
+					currentIndex++;
+				}
 			}
 		};
 
@@ -389,7 +519,7 @@
 			// }
 
 			if("_text" in script){
-
+				this.runText(script);
 			}
 
 			if("_image" in script){
@@ -412,6 +542,9 @@
 
 		this.prepareScript = function(){
 			var vnwe = this;
+			this.renderThread = setInterval(function(){
+				vnwe.renderFrame();
+			}, 1000/60);
 			document.addEventListener("keypress", function(e){
 				if(e.keyCode && e.keyCode !== 32 && e.keyCode !== 13){
 					return;

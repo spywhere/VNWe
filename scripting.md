@@ -71,12 +71,13 @@ Unless specified by each command.
 
 ### Text Format
 - `\n` = New line
+- `\\\\` = `\` character
+- `\\[` = `[` character
 - `[clr]` = Clear screen
 - `[c=<Color>]...[/c]` = Text color [color]
 - `[s=<Size>]...[/s]` = Text size [integer]
 - `[i]...[/i]` = Italic text
 - `[b]...[/b]` = Bold text
-- `[u]...[/u]` = Underline text
 
 ### Animation Timing Script
 
