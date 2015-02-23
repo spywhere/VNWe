@@ -1,13 +1,11 @@
-"use strict";
-
-(function (window) {
+(function(window){
 	"use strict";
 
-	function VNWeEnglishLanguage() {
+	function VNWeEnglishLanguage(){
 		this.verificationFailed = "Game verification failed";
 	}
 
-	function VNWeStep(settings) {
+	function VNWeStep(settings){
 		this._game = settings.game;
 		this._texts = settings.texts;
 		this._images = settings.images;
@@ -19,28 +17,28 @@
 		this._callbacks = settings.callbacks;
 		this._custom = settings.custom;
 
-		this.ending = function (ending) {
+		this.ending = function(ending){
 			this._ending = ending;
 		};
 
-		this.image = function () {
-			if ("_image" in this) {
+		this.image = function(){
+			if("_image" in this){
 				return this.path("images", this._image.url);
-			} else {
+			}else{
 				return null;
 			}
 		};
 
-		this.path = function (type, url) {
-			if (url) {
+		this.path = function(type, url){
+			if(url){
 				return this.path(type) + url;
-			} else {
+			}else{
 				return this._paths[type];
 			}
 		};
 	}
 
-	function VNWeScript() {
+	function VNWeScript(){
 		this._ending = {
 			delay: -1,
 			prompter: true
@@ -136,12 +134,12 @@
 
 		// VN Settings
 
-		this.mergeObject = function (source, merge) {
-			for (var key in source) {
-				if (key in merge) {
-					if (merge[key] === Object(merge[key])) {
+		this.mergeObject = function(source, merge){
+			for(var key in source){
+				if(key in merge){
+					if(merge[key] === Object(merge[key])){
 						source[key] = this.mergeObject(source[key], merge[key] || {});
-					} else {
+					}else{
 						source[key] = merge[key];
 					}
 				}
@@ -149,96 +147,96 @@
 			return source;
 		};
 
-		this.game = function (properties) {
-			if (properties === null || properties === undefined) {
+		this.game = function(properties){
+			if(properties === null || properties === undefined){
 				return this._game;
-			} else {
+			}else{
 				this.mergeObject(this._game, properties || {});
 				return this;
 			}
 		};
 
-		this.texts = function (properties) {
-			if (properties === null || properties === undefined) {
+		this.texts = function(properties){
+			if(properties === null || properties === undefined){
 				return this._texts;
-			} else {
+			}else{
 				this.mergeObject(this._texts, properties || {});
 				return this;
 			}
 		};
 
-		this.images = function (properties) {
-			if (properties === null || properties === undefined) {
+		this.images = function(properties){
+			if(properties === null || properties === undefined){
 				return this._images;
-			} else {
+			}else{
 				this.mergeObject(this._images, properties || {});
 				return this;
 			}
 		};
 
-		this.prompter = function (properties) {
-			if (properties === null || properties === undefined) {
+		this.prompter = function(properties){
+			if(properties === null || properties === undefined){
 				return this._prompter;
-			} else {
+			}else{
 				this.mergeObject(this._prompter, properties || {});
 				return this;
 			}
 		};
 
-		this.sounds = function (properties) {
-			if (properties === null || properties === undefined) {
+		this.sounds = function(properties){
+			if(properties === null || properties === undefined){
 				return this._sounds;
-			} else {
+			}else{
 				this.mergeObject(this._sounds, properties || {});
 				return this;
 			}
 		};
 
-		this.paths = function (properties) {
-			if (properties === null || properties === undefined) {
+		this.paths = function(properties){
+			if(properties === null || properties === undefined){
 				return this._paths;
-			} else {
+			}else{
 				this.mergeObject(this._paths, properties || {});
 				return this;
 			}
 		};
 
-		this.notes = function (properties) {
-			if (properties === null || properties === undefined) {
+		this.notes = function(properties){
+			if(properties === null || properties === undefined){
 				return this._notes;
-			} else {
+			}else{
 				this.mergeObject(this._notes, properties || {});
 				return this;
 			}
 		};
 
-		this.debug = function (properties) {
-			if (properties === null || properties === undefined) {
+		this.debug = function(properties){
+			if(properties === null || properties === undefined){
 				return this._debug;
-			} else {
+			}else{
 				this.mergeObject(this._debug, properties || {});
 				return this;
 			}
 		};
 
-		this.callbacks = function (properties) {
-			if (properties === null || properties === undefined) {
+		this.callbacks = function(properties){
+			if(properties === null || properties === undefined){
 				return this._callbacks;
-			} else {
+			}else{
 				this.mergeObject(this._callbacks, properties || {});
 				return this;
 			}
 		};
 
-		this.custom = function (code) {
+		this.custom = function(code){
 			this._custom = code || "";
 			return this;
 		};
 
 		// Scripting
 
-		this.text = function (text, speed) {
-			if (!text) {
+		this.text = function(text, speed){
+			if(!text){
 				return this;
 			}
 			speed = speed || 30;
@@ -250,8 +248,8 @@
 			return this;
 		};
 
-		this.image = function (url, duration) {
-			if (!url) {
+		this.image = function(url, duration){
+			if(!url){
 				return this;
 			}
 			duration = duration || 100;
@@ -263,8 +261,8 @@
 			return this;
 		};
 
-		this.auto = function (delay) {
-			if (delay === null || delay === undefined || delay < 0) {
+		this.auto = function(delay){
+			if(delay === null || delay === undefined || delay < 0){
 				delay = 0;
 			}
 			var step = this._makeStep();
@@ -276,8 +274,8 @@
 			return this;
 		};
 
-		this.wait = function (prompter) {
-			if (prompter === null || prompter === undefined) {
+		this.wait = function(prompter){
+			if(prompter === null || prompter === undefined){
 				prompter = true;
 			}
 			var step = this._makeStep();
@@ -291,16 +289,16 @@
 
 		// Internal
 
-		this._imageProgress = function (script, ctx, progress) {
+		this._imageProgress = function(script, ctx, progress){
 			ctx.clearRect(0, 0, script._game.width, script._game.height);
 			ctx.font = "16px sans-serif";
 			ctx.fillStyle = "#ffffff";
 			ctx.textAlign = "center";
 			ctx.textBaseline = "middle";
-			ctx.fillText("Loading " + (progress * 100).toFixed(2) + "%", script._game.width / 2, script._game.height / 2);
+			ctx.fillText("Loading " + (progress*100).toFixed(2) + "%", script._game.width/2, script._game.height/2);
 		};
 
-		this._makeStep = function () {
+		this._makeStep = function(){
 			var step = new VNWeStep({
 				game: this._game,
 				texts: this._texts,
@@ -313,69 +311,69 @@
 				callbacks: this._callbacks,
 				custom: this._custom
 			});
-			if ("_text" in this && this._text) {
+			if("_text" in this && this._text){
 				step._text = this._text;
 				this._text = undefined;
 			}
-			if ("_image" in this && this._image) {
+			if("_image" in this && this._image){
 				step._image = this._image;
 				this._image = undefined;
 			}
 			return step;
 		};
 
-		this._resetLine = function () {
+		this._resetLine = function(){
 			this._line = 0;
 		};
 
-		this._getLine = function () {
+		this._getLine = function(){
 			return this._line;
 		};
 
-		this._nextLine = function () {
+		this._nextLine = function(){
 			return this._line++;
 		};
 
-		this._getImage = function (line) {
+		this._getImage = function(line){
 			return this._getScript(line).image();
 		};
 
-		this._getScript = function (line) {
-			if (line === null || line === undefined) {
+		this._getScript = function(line){
+			if(line === null || line === undefined){
 				line = this._nextLine();
 			}
 			return this._script[line];
 		};
 
-		this._totalScript = function () {
+		this._totalScript = function(){
 			return this._script.length;
 		};
 
-		this.getVersion = function () {
+		this.getVersion = function(){
 			return "VNWe v3.0";
 		};
 
 		this._callbacks.loading.images = this._imageProgress;
-		this._callbacks.finish.game = function () {
+		this._callbacks.finish.game = function(){
 			alert("End!");
 		};
 	}
 
-	function VNWe(script) {
+	function VNWe(script){
 		this.markupPattern = /\[(clr|[bi]|\/([bsic])|([cs])=([^\]]+))\]/i;
 		this.lang = new VNWeLanguage();
 		this.script = script;
 		this.waiting = {};
 		this.render = {};
 
-		this.getTick = function () {
-			return new Date().getTime();
+		this.getTick = function(){
+			return (new Date()).getTime();
 		};
 
-		this.endScript = function () {
+		this.endScript = function(){
 			clearInterval(this.renderThread);
 			this.renderThread = undefined;
-			if (this.script._callbacks.finish.game) {
+			if(this.script._callbacks.finish.game){
 				var ctx = this.game.getContext("2d");
 				ctx.save();
 				this.script._callbacks.finish.game(this.script, ctx);
@@ -383,85 +381,85 @@
 			}
 		};
 
-		this.runText = function (script, currentIndex) {
-			if (currentIndex === null || currentIndex === undefined) {
+		this.runText = function(script, currentIndex){
+			if(currentIndex === null || currentIndex === undefined){
 				currentIndex = 0;
 			}
 
-			if (currentIndex < script._text.text.length) {
+			if(currentIndex < script._text.text.length){
 				this.waiting.text = true;
-			} else {
+			}else{
 				this.waiting.text = false;
 				return;
 			}
-			if (!("text" in this.render)) {
+			if(!("text" in this.render)){
 				this.render.text = "";
 			}
 
 			var matches = this.markupPattern.exec(script._text.text.substr(currentIndex));
 			var escape = script._text.text.substr(currentIndex, 2);
-			if (escape === "\\[" || escape === "\\\\") {
+			if(escape === "\\[" || escape === "\\\\"){
 				this.render.text += escape;
 				currentIndex += 2;
-			} else if (matches && matches.index === 0) {
+			}else if(matches && matches.index === 0){
 				var markup = matches[1];
-				if (markup === "clr") {
+				if(markup === "clr"){
 					this.render.text = "";
-				} else {
+				}else{
 					this.render.text += script._text.text.substr(currentIndex, matches[0].length);
 				}
 				currentIndex += matches[0].length;
-			} else {
+			}else{
 				this.render.text += script._text.text[currentIndex++];
 			}
 
-			if (this.waiting.text) {
+			if(this.waiting.text){
 				var vnwe = this;
-				setTimeout(function () {
+				setTimeout(function(){
 					vnwe.runText(script, currentIndex);
 				}, script._text.speed);
 			}
 		};
 
-		this.fadeImage = function (script, endTime) {
+		this.fadeImage = function(script, endTime){
 			var image = script._image;
-			endTime = endTime || this.getTick() + image.duration;
+			endTime = endTime || this.getTick()+image.duration;
 
 			var img = new Image();
 			img.src = script.path("images", image.url);
 
-			var elapse = endTime - this.getTick();
-			if (elapse < 0 || image.duration === 2) {
+			var elapse = endTime-this.getTick();
+			if(elapse < 0 || image.duration === 2){
 				this.render.image = {
 					image: img,
 					opacity: 1
 				};
 				this.waiting.image = false;
-			} else {
+			}else{
 				this.render.image = {
 					image: img,
-					opacity: 1 - elapse / image.duration
+					opacity: 1-elapse/image.duration
 				};
 				this.waiting.image = true;
 			}
 
-			if (this.waiting.image) {
+			if(this.waiting.image){
 				var vnwe = this;
-				setTimeout(function () {
+				setTimeout(function(){
 					vnwe.fadeImage(script, endTime);
 				}, 25);
 			}
 		};
 
-		this.renderFrame = function () {
+		this.renderFrame = function(){
 			var ctx = this.game.getContext("2d");
-			if ("image" in this.render) {
+			if("image" in this.render){
 				ctx.save();
 				ctx.globalAlpha = this.render.image.opacity;
 				ctx.drawImage(this.render.image.image, 0, 0);
 				ctx.restore();
 			}
-			if ("text" in this.render) {
+			if("text" in this.render){
 				var currentIndex = 0;
 				var ox = 0;
 				var oy = 0;
@@ -472,34 +470,34 @@
 				var defColor = "#ffffff";
 				var fontColor = "#ffffff";
 
-				while (currentIndex < this.render.text.length) {
+				while(currentIndex < this.render.text.length){
 					var matches = this.markupPattern.exec(this.render.text.substr(currentIndex));
 					var escape = this.render.text.substr(currentIndex, 2);
-					if (escape === "\\[" || escape === "\\\\") {
+					if(escape === "\\[" || escape === "\\\\"){
 						currentIndex += 1;
 						// Add one more belows
-					} else if (matches && matches.index === 0) {
-						if (matches[3]) {
+					}else if(matches && matches.index === 0){
+						if(matches[3]){
 							var styleType = matches[3];
 							var value = matches[4];
-							if (styleType === "s") {
+							if(styleType === "s"){
 								fontSize = value;
-							} else if (styleType === "c") {
+							}else if(styleType === "c"){
 								fontColor = value;
 							}
-						} else {
+						}else{
 							var markup = matches[1];
-							if (markup === "b") {
+							if(markup === "b"){
 								bold = true;
-							} else if (markup === "/b") {
+							}else if(markup === "/b"){
 								bold = false;
-							} else if (markup === "i") {
+							}else if(markup === "i"){
 								italic = true;
-							} else if (markup === "/i") {
+							}else if(markup === "/i"){
 								italic = false;
-							} else if (markup === "/s") {
+							}else if(markup === "/s"){
 								fontSize = defSize;
-							} else if (markup === "/c") {
+							}else if(markup === "/c"){
 								fontColor = defColor;
 							}
 						}
@@ -508,10 +506,10 @@
 					}
 
 					var fontName = "";
-					if (bold) {
+					if(bold){
 						fontName += "bold ";
 					}
-					if (italic) {
+					if(italic){
 						fontName += "italic ";
 					}
 					fontName += fontSize + "px ";
@@ -520,7 +518,7 @@
 					ctx.save();
 					ctx.font = fontName;
 					ctx.fillStyle = fontColor;
-					ctx.fillText(this.render.text[currentIndex], 100 + ox, 400 + oy);
+					ctx.fillText(this.render.text[currentIndex], 100+ox, 400+oy);
 					ox += ctx.measureText(this.render.text[currentIndex]).width;
 					ctx.restore();
 					currentIndex++;
@@ -528,16 +526,16 @@
 			}
 		};
 
-		this.nextScript = function () {
-			for (var key in this.waiting) {
-				if (this.waiting[key]) {
+		this.nextScript = function(){
+			for(var key in this.waiting){
+				if(this.waiting[key]){
 					return;
 				}
 			}
 
 			this.waiting.main = true;
 			this.currentLine = this.script._nextLine();
-			if (this.currentLine >= this.script._totalScript()) {
+			if(this.currentLine >= this.script._totalScript()){
 				this.endScript();
 				return;
 			}
@@ -574,21 +572,21 @@
 			// 	console.log("Setup custom");
 			// }
 
-			if ("_text" in script) {
+			if("_text" in script){
 				this.runText(script);
 			}
 
-			if ("_image" in script) {
+			if("_image" in script){
 				this.fadeImage(script);
 			}
 
-			if ("_ending" in script) {
+			if("_ending" in script){
 				var ending = script._ending;
 				var vnwe = this;
-				if (ending.delay < 0) {
+				if(ending.delay < 0){
 					this.waiting.main = false;
-				} else {
-					setTimeout(function () {
+				}else{
+					setTimeout(function(){
 						vnwe.waiting.main = false;
 						vnwe.nextScript();
 					}, ending.delay);
@@ -596,28 +594,28 @@
 			}
 		};
 
-		this.prepareScript = function () {
+		this.prepareScript = function(){
 			var vnwe = this;
-			this.renderThread = setInterval(function () {
+			this.renderThread = setInterval(function(){
 				vnwe.renderFrame();
-			}, 1000 / 60);
-			document.addEventListener("keypress", function (e) {
-				if (e.keyCode && e.keyCode !== 32 && e.keyCode !== 13) {
+			}, 1000/60);
+			document.addEventListener("keypress", function(e){
+				if(e.keyCode && e.keyCode !== 32 && e.keyCode !== 13){
 					return;
 				}
 				vnwe.nextScript();
 			});
-			document.addEventListener("click", function () {
+			document.addEventListener("click", function(){
 				vnwe.nextScript();
 			});
 			this.nextScript();
 		};
 
-		this.preloadImage = function (index) {
+		this.preloadImage = function(index){
 			index = index || 0;
 
 			var ctx = this.game.getContext("2d");
-			if (this.script._totalScript() <= index) {
+			if(this.script._totalScript() <= index){
 				ctx.save();
 				ctx.clearRect(0, 0, script._game.width, script._game.height);
 				ctx.restore();
@@ -625,32 +623,32 @@
 				return;
 			}
 
-			if (this.script._callbacks.loading.images) {
+			if(this.script._callbacks.loading.images){
 				ctx.save();
-				this.script._callbacks.loading.images(this.script, ctx, index / this.script._totalScript());
+				this.script._callbacks.loading.images(this.script, ctx, index/this.script._totalScript());
 				ctx.restore();
 			}
 
 			var imageURL = this.script._getImage(index);
-			if (!imageURL) {
-				this.preloadImage(index + 1);
+			if(!imageURL){
+				this.preloadImage(index+1);
 				return;
 			}
 			var image = new Image();
 			var vnwe = this;
-			image.addEventListener("load", function () {
-				vnwe.preloadImage(index + 1);
+			image.addEventListener("load", function(){
+				vnwe.preloadImage(index+1);
 			});
-			image.addEventListener("error", function () {
+			image.addEventListener("error", function(){
 				console.error("Error cannot load " + imageURL);
-				vnwe.preloadImage(index + 1);
+				vnwe.preloadImage(index+1);
 			});
 			image.src = imageURL;
 		};
 
-		this.verifyGame = function () {
+		this.verifyGame = function(){
 			var verification = new VNWeScript();
-			if (typeof this.script.getVersion !== "function" || this.script.getVersion() !== verification.getVersion()) {
+			if(typeof this.script.getVersion !== "function" || this.script.getVersion() !== verification.getVersion()){
 				alert(this.lang.verificationFailed);
 				console.log(this.lang.verificationFailed);
 				return;
@@ -659,20 +657,16 @@
 			this.preloadImage();
 		};
 
-		this.init = function () {
-			if (document.onselectstart) {
-				document.onselectstart = function () {
-					return false;
-				};
+		this.init = function(){
+			if(document.onselectstart){
+				document.onselectstart=function(){return false;};
 			}
-			if (document.oncontextmenu) {
-				document.oncontextmenu = function () {
-					return false;
-				};
+			if(document.oncontextmenu){
+				document.oncontextmenu=function(){return false;};
 			}
 			this.game = document.createElement("canvas");
 			var supported = this.game.getContext && this.game.getContext("2d");
-			if (!supported) {
+			if(!supported){
 				this.game = document.createElement("div");
 			}
 			this.game.style.position = "absolute";
@@ -686,7 +680,7 @@
 			this.game.style.border = "1px solid #ffffff";
 			document.body.style.backgroundColor = "#000000";
 			document.body.appendChild(this.game);
-			if (!supported) {
+			if(!supported){
 				var table = document.createElement("table");
 				table.style.width = "100%";
 				table.style.height = "100%";
@@ -709,7 +703,7 @@
 
 	window.VNWeLanguage = VNWeEnglishLanguage;
 	window.VNWeScript = VNWeScript;
-	window.VNWe = function (script) {
+	window.VNWe = function(script){
 		var game = new VNWe(script);
 		game.init();
 	};

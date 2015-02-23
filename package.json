@@ -2,6 +2,7 @@
   "name": "VNWe",
   "version": "3.0.0",
   "dependencies": {
+    "babel": "^4.4.5",
     "jshint": "^2.6.0"
   }
 }

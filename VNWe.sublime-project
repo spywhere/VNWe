@@ -14,7 +14,7 @@
 	            "run": {
 	            	"name": "Verify all .js files",
 	            	"description": "Code test on .js files",
-	                "command": "./node_modules/jshint/bin/jshint js/vnwe.js assets/*"
+	                "command": "jshint src/* assets/*"
 	            }
 	        }
 	    }
