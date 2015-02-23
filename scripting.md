@@ -130,7 +130,7 @@ window.VNWe(
 
 ### VN Settings
 
-By passing nothing to any command, the command will returns its value and must be use as a read-only object.
+By passing nothing to any command, the command will returns its value.
 
 Only valid settings will be set to the game.
 
