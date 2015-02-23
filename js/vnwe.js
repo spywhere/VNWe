@@ -148,65 +148,117 @@
 		};
 
 		this.game = function(properties){
-			return this.mergeObject(this._game, properties || {});
+			if(properties === null || properties === undefined){
+				return this._game;
+			}else{
+				this.mergeObject(this._game, properties || {});
+				return this;
+			}
 		};
 
 		this.texts = function(properties){
-			return this.mergeObject(this._texts, properties || {});
+			if(properties === null || properties === undefined){
+				return this._texts;
+			}else{
+				this.mergeObject(this._texts, properties || {});
+				return this;
+			}
 		};
 
 		this.images = function(properties){
-			return this.mergeObject(this._images, properties || {});
+			if(properties === null || properties === undefined){
+				return this._images;
+			}else{
+				this.mergeObject(this._images, properties || {});
+				return this;
+			}
 		};
 
 		this.prompter = function(properties){
-			return this.mergeObject(this._prompter, properties || {});
+			if(properties === null || properties === undefined){
+				return this._prompter;
+			}else{
+				this.mergeObject(this._prompter, properties || {});
+				return this;
+			}
 		};
 
 		this.sounds = function(properties){
-			return this.mergeObject(this._sounds, properties || {});
+			if(properties === null || properties === undefined){
+				return this._sounds;
+			}else{
+				this.mergeObject(this._sounds, properties || {});
+				return this;
+			}
 		};
 
 		this.paths = function(properties){
-			return this.mergeObject(this._paths, properties || {});
+			if(properties === null || properties === undefined){
+				return this._paths;
+			}else{
+				this.mergeObject(this._paths, properties || {});
+				return this;
+			}
 		};
 
 		this.notes = function(properties){
-			return this.mergeObject(this._notes, properties || {});
+			if(properties === null || properties === undefined){
+				return this._notes;
+			}else{
+				this.mergeObject(this._notes, properties || {});
+				return this;
+			}
 		};
 
 		this.debug = function(properties){
-			return this.mergeObject(this._debug, properties || {});
+			if(properties === null || properties === undefined){
+				return this._debug;
+			}else{
+				this.mergeObject(this._debug, properties || {});
+				return this;
+			}
 		};
 
 		this.callbacks = function(properties){
-			return this.mergeObject(this._callbacks, properties || {});
+			if(properties === null || properties === undefined){
+				return this._callbacks;
+			}else{
+				this.mergeObject(this._callbacks, properties || {});
+				return this;
+			}
 		};
 
 		this.custom = function(code){
 			this._custom = code || "";
+			return this;
 		};
 
 		// Scripting
 
 		this.text = function(text, speed){
-			if(!text){return;}
+			if(!text){
+				return this;
+			}
 			speed = speed || 30;
 
 			this._text = {
 				text: text,
 				speed: speed
 			};
+			return this;
 		};
 
 		this.image = function(url, duration){
-			if(!url){return;}
+			if(!url){
+				return this;
+			}
 			duration = duration || 100;
 
 			this._image = {
 				url: url,
 				duration: duration
 			};
+			return this;
 		};
 
 		this.auto = function(delay){
@@ -219,6 +271,7 @@
 				prompter: false
 			});
 			this._script[this._nextLine()] = step;
+			return this;
 		};
 
 		this.wait = function(prompter){
@@ -231,6 +284,7 @@
 				prompter: prompter
 			});
 			this._script[this._nextLine()] = step;
+			return this;
 		};
 
 		// Internal
@@ -344,12 +398,12 @@
 
 			var matches = this.markupPattern.exec(script._text.text.substr(currentIndex));
 			var escape = script._text.text.substr(currentIndex, 2);
-			if(escape == "\\[" || escape == "\\\\"){
+			if(escape === "\\[" || escape === "\\\\"){
 				this.render.text += escape;
 				currentIndex += 2;
-			}else if(matches && matches.index == 0){
+			}else if(matches && matches.index === 0){
 				var markup = matches[1];
-				if(markup == "clr"){
+				if(markup === "clr"){
 					this.render.text = "";
 				}else{
 					this.render.text += script._text.text.substr(currentIndex, matches[0].length);
@@ -419,31 +473,31 @@
 				while(currentIndex < this.render.text.length){
 					var matches = this.markupPattern.exec(this.render.text.substr(currentIndex));
 					var escape = this.render.text.substr(currentIndex, 2);
-					if(escape == "\\[" || escape == "\\\\"){
+					if(escape === "\\[" || escape === "\\\\"){
 						currentIndex += 1;
 						// Add one more belows
-					}else if(matches && matches.index == 0){
+					}else if(matches && matches.index === 0){
 						if(matches[3]){
 							var styleType = matches[3];
 							var value = matches[4];
-							if(styleType == "s"){
+							if(styleType === "s"){
 								fontSize = value;
-							}else if(styleType == "c"){
+							}else if(styleType === "c"){
 								fontColor = value;
 							}
 						}else{
 							var markup = matches[1];
-							if(markup == "b"){
+							if(markup === "b"){
 								bold = true;
-							}else if(markup == "/b"){
+							}else if(markup === "/b"){
 								bold = false;
-							}else if(markup == "i"){
+							}else if(markup === "i"){
 								italic = true;
-							}else if(markup == "/i"){
+							}else if(markup === "/i"){
 								italic = false;
-							}else if(markup == "/s"){
+							}else if(markup === "/s"){
 								fontSize = defSize;
-							}else if(markup == "/c"){
+							}else if(markup === "/c"){
 								fontColor = defColor;
 							}
 						}

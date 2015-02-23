@@ -90,9 +90,47 @@ Each timing separated by a `|` (pipe)
 
 Example: `wait:8000|hide:500|rand:50|rand:5..100`
 
+### Methods Chaining
+VNWe supports methods chaining which makes the script easier and shorter to write.
+
+Here is the normal scripting
+
+```javascript
+// ...
+var myscript = new VNWeScript();
+
+myscript.image("bg01.jpg");
+myscript.text("Lorem ipsum dolor sit amet, consectetur adipiscing elit.");
+myscript.wait();
+myscript.image("bg02.jpg");
+myscript.text("In rutrum eget tellus eu fermentum.");
+myscript.wait();
+
+window.VNWe(myscript);
+// ...
+```
+
+in which you can write it in this way
+
+```javascript
+// ...
+
+window.VNWe(
+	new VNWeScript()
+	.image("bg01.jpg")
+	.text("Lorem ipsum dolor sit amet, consectetur adipiscing elit.")
+	.wait()
+	.image("bg02.jpg")
+	.text("In rutrum eget tellus eu fermentum.")
+	.wait()
+);
+
+// ...
+```
+
 ### VN Settings
 
-Each command returns the object that has been set and must be use as a read-only object.
+By passing nothing to any command, the command will returns its value and must be use as a read-only object.
 
 Only valid settings will be set to the game.
 
