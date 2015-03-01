@@ -30,7 +30,14 @@ fs.readdir(sourceDir, function(err, files){
 		}
 		console.log("Code has been compiled into vnwe.js !");
 	});
-	var minifiedCode = uglify.minify(result.code, {fromString: true}).code;
+	var minifiedOption = {
+		fromString: true,
+		mangle: true,
+		output: {
+			max_line_len: 500
+		}
+	};
+	var minifiedCode = uglify.minify(result.code, minifiedOption).code;
 	fs.writeFile(outputPath+".min.js", license+minifiedCode, function(err){
 		if(err){
 			throw err;

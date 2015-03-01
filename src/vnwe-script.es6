@@ -135,7 +135,7 @@ class VNWeScript {
 	}
 
 	mergeObject(source, merge){
-		for(var key in source){
+		for(let key in source){
 			if(key in merge){
 				if(merge[key] === Object(merge[key])){
 					source[key] = this.mergeObject(source[key], merge[key] || {});
@@ -255,7 +255,7 @@ class VNWeScript {
 		if(delay === null || delay === undefined || delay < 0){
 			delay = 0;
 		}
-		var step = this._makeStep();
+		let step = this._makeStep();
 		step.ending({
 			delay: delay,
 			prompter: false
@@ -268,7 +268,7 @@ class VNWeScript {
 		if(prompter === null || prompter === undefined){
 			prompter = true;
 		}
-		var step = this._makeStep();
+		let step = this._makeStep();
 		step.ending({
 			delay: -1,
 			prompter: prompter
@@ -289,7 +289,7 @@ class VNWeScript {
 	}
 
 	_makeStep(){
-		var step = new VNWeStep({
+		let step = new VNWeStep({
 			game: this._game,
 			texts: this._texts,
 			images: this._images,

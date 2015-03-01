@@ -1,4 +1,3 @@
-
 class VNWe {
 	constructor(script){
 		this.markupPattern = /\[(clr|[bi]|\/([bsic])|([cs])=([^\]]+))\]/i;
@@ -16,7 +15,7 @@ class VNWe {
 		clearInterval(this.renderThread);
 		this.renderThread = undefined;
 		if(this.script._callbacks.finish.game){
-			var ctx = this.game.getContext("2d");
+			let ctx = this.game.getContext("2d");
 			ctx.save();
 			this.script._callbacks.finish.game(this.script, ctx);
 			ctx.restore();
@@ -38,13 +37,13 @@ class VNWe {
 			this.render.text = "";
 		}
 
-		var matches = this.markupPattern.exec(script._text.text.substr(currentIndex));
-		var escape = script._text.text.substr(currentIndex, 2);
-		if(escape === "\\[" || escape === "\\\\"){
-			this.render.text += escape;
+		let matches = this.markupPattern.exec(script._text.text.substr(currentIndex));
+		let esc = script._text.text.substr(currentIndex, 2);
+		if(esc === "\\[" || esc === "\\\\"){
+			this.render.text += esc;
 			currentIndex += 2;
 		}else if(matches && matches.index === 0){
-			var markup = matches[1];
+			let markup = matches[1];
 			if(markup === "clr"){
 				this.render.text = "";
 			}else{
@@ -56,21 +55,20 @@ class VNWe {
 		}
 
 		if(this.waiting.text){
-			var vnwe = this;
 			setTimeout(()=>{
-				vnwe.runText(script, currentIndex);
+				this.runText(script, currentIndex);
 			}, script._text.speed);
 		}
 	}
 
 	fadeImage(script, endTime){
-		var image = script._image;
+		let image = script._image;
 		endTime = endTime || this.getTick()+image.duration;
 
-		var img = new Image();
+		let img = new Image();
 		img.src = script.path("images", image.url);
 
-		var elapse = endTime-this.getTick();
+		let elapse = endTime-this.getTick();
 		if(elapse < 0 || image.duration === 2){
 			this.render.image = {
 				image: img,
@@ -86,15 +84,14 @@ class VNWe {
 		}
 
 		if(this.waiting.image){
-			var vnwe = this;
 			setTimeout(()=>{
-				vnwe.fadeImage(script, endTime);
+				this.fadeImage(script, endTime);
 			}, 25);
 		}
 	}
 
 	renderFrame(){
-		var ctx = this.game.getContext("2d");
+		let ctx = this.game.getContext("2d");
 		if("image" in this.render){
 			ctx.save();
 			ctx.globalAlpha = this.render.image.opacity;
@@ -102,33 +99,33 @@ class VNWe {
 			ctx.restore();
 		}
 		if("text" in this.render){
-			var currentIndex = 0;
-			var ox = 0;
-			var oy = 0;
-			var bold = false;
-			var italic = false;
-			var defSize = "14";
-			var fontSize = "14";
-			var defColor = "#ffffff";
-			var fontColor = "#ffffff";
+			let currentIndex = 0;
+			let ox = 0;
+			let oy = 0;
+			let bold = false;
+			let italic = false;
+			let defSize = "14";
+			let fontSize = "14";
+			let defColor = "#ffffff";
+			let fontColor = "#ffffff";
 
 			while(currentIndex < this.render.text.length){
-				var matches = this.markupPattern.exec(this.render.text.substr(currentIndex));
-				var escape = this.render.text.substr(currentIndex, 2);
-				if(escape === "\\[" || escape === "\\\\"){
+				let matches = this.markupPattern.exec(this.render.text.substr(currentIndex));
+				let esc = this.render.text.substr(currentIndex, 2);
+				if(esc === "\\[" || esc === "\\\\"){
 					currentIndex += 1;
 					// Add one more belows
 				}else if(matches && matches.index === 0){
 					if(matches[3]){
-						var styleType = matches[3];
-						var value = matches[4];
+						let styleType = matches[3];
+						let value = matches[4];
 						if(styleType === "s"){
 							fontSize = value;
 						}else if(styleType === "c"){
 							fontColor = value;
 						}
 					}else{
-						var markup = matches[1];
+						let markup = matches[1];
 						if(markup === "b"){
 							bold = true;
 						}else if(markup === "/b"){
@@ -147,7 +144,7 @@ class VNWe {
 					continue;
 				}
 
-				var fontName = "";
+				let fontName = "";
 				if(bold){
 					fontName += "bold ";
 				}
@@ -169,7 +166,7 @@ class VNWe {
 	}
 
 	nextScript(){
-		for(var key in this.waiting){
+		for(let key in this.waiting){
 			if(this.waiting[key]){
 				return;
 			}
@@ -181,7 +178,7 @@ class VNWe {
 			this.endScript();
 			return;
 		}
-		var script = this.script._getScript(this.currentLine);
+		let script = this.script._getScript(this.currentLine);
 
 		// if("_game" in script){
 		// 	console.log("Setup game");
@@ -223,32 +220,30 @@ class VNWe {
 		}
 
 		if("_ending" in script){
-			var ending = script._ending;
-			var vnwe = this;
+			let ending = script._ending;
 			if(ending.delay < 0){
 				this.waiting.main = false;
 			}else{
 				setTimeout(()=>{
-					vnwe.waiting.main = false;
-					vnwe.nextScript();
+					this.waiting.main = false;
+					this.nextScript();
 				}, ending.delay);
 			}
 		}
 	}
 
 	prepareScript(){
-		var vnwe = this;
 		this.renderThread = setInterval(()=>{
-			vnwe.renderFrame();
+			this.renderFrame();
 		}, 1000/60);
 		document.addEventListener("keypress", (e)=>{
 			if(e.keyCode && e.keyCode !== 32 && e.keyCode !== 13){
 				return;
 			}
-			vnwe.nextScript();
+			this.nextScript();
 		});
 		document.addEventListener("click", ()=>{
-			vnwe.nextScript();
+			this.nextScript();
 		});
 		this.nextScript();
 	}
@@ -256,7 +251,7 @@ class VNWe {
 	preloadImage(index){
 		index = index || 0;
 
-		var ctx = this.game.getContext("2d");
+		let ctx = this.game.getContext("2d");
 		if(this.script._totalScript() <= index){
 			ctx.save();
 			ctx.clearRect(0, 0, this.script._game.width, this.script._game.height);
@@ -271,25 +266,24 @@ class VNWe {
 			ctx.restore();
 		}
 
-		var imageURL = this.script._getImage(index);
+		let imageURL = this.script._getImage(index);
 		if(!imageURL){
 			this.preloadImage(index+1);
 			return;
 		}
-		var image = new Image();
-		var vnwe = this;
+		let image = new Image();
 		image.addEventListener("load", ()=>{
-			vnwe.preloadImage(index+1);
+			this.preloadImage(index+1);
 		});
 		image.addEventListener("error", ()=>{
 			console.error("Error cannot load " + imageURL);
-			vnwe.preloadImage(index+1);
+			this.preloadImage(index+1);
 		});
 		image.src = imageURL;
 	}
 
 	verifyGame(){
-		var verification = new VNWeScript();
+		let verification = new VNWeScript();
 		if(typeof this.script.getVersion !== "function" || this.script.getVersion() !== verification.getVersion()){
 			alert(this.lang.verificationFailed);
 			console.log(this.lang.verificationFailed);
@@ -311,7 +305,7 @@ class VNWe {
 			};
 		}
 		this.game = document.createElement("canvas");
-		var supported = this.game.getContext && this.game.getContext("2d");
+		let supported = this.game.getContext && this.game.getContext("2d");
 		if(!supported){
 			this.game = document.createElement("div");
 		}
@@ -327,13 +321,13 @@ class VNWe {
 		document.body.style.backgroundColor = "#000000";
 		document.body.appendChild(this.game);
 		if(!supported){
-			var table = document.createElement("table");
+			let table = document.createElement("table");
 			table.style.width = "100%";
 			table.style.height = "100%";
 			this.game.appendChild(table);
-			var row = document.createElement("tr");
+			let row = document.createElement("tr");
 			table.appendChild(row);
-			var cell = document.createElement("td");
+			let cell = document.createElement("td");
 			cell.align = "center";
 			cell.style.color = "#ffffff";
 			cell.innerHTML = "Your browser is not support canvas. Please upgrade to newer version.";
@@ -348,7 +342,7 @@ class VNWe {
 }
 
 window.VNWe = (script)=>{
-	var game = new VNWe(script);
+	let game = new VNWe(script);
 	game.init();
 };
 
